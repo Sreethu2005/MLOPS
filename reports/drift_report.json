@@ -1,0 +1,76 @@
+{
+  "timestamp": "2026-10-11T16:17:47.445315",
+  "reference_sample_size": 69665,
+  "current_sample_size": 14992,
+  "total_features_evaluated": 9,
+  "features_warning": 0,
+  "features_critical": 0,
+  "overall_status": "STABLE",
+  "action_recommendation": "Distributions are statistically stable within calibrated thresholds.",
+  "feature_drift_details": {
+    "num_medications": {
+      "feature_type": "numerical",
+      "psi": 0.0015,
+      "status": "stable",
+      "ks_statistic": 0.0166,
+      "ks_p_value": 0.00226,
+      "distribution_shift_detected": true
+    },
+    "number_inpatient": {
+      "feature_type": "numerical",
+      "psi": 0.0001,
+      "status": "stable",
+      "ks_statistic": 0.0032,
+      "ks_p_value": 0.999446,
+      "distribution_shift_detected": false
+    },
+    "time_in_hospital": {
+      "feature_type": "numerical",
+      "psi": 0.0004,
+      "status": "stable",
+      "ks_statistic": 0.0052,
+      "ks_p_value": 0.897266,
+      "distribution_shift_detected": false
+    },
+    "num_lab_procedures": {
+      "feature_type": "numerical",
+      "psi": 0.0005,
+      "status": "stable",
+      "ks_statistic": 0.0075,
+      "ks_p_value": 0.489976,
+      "distribution_shift_detected": false
+    },
+    "number_diagnoses": {
+      "feature_type": "numerical",
+      "psi": 0.0007,
+      "status": "stable",
+      "ks_statistic": 0.0091,
+      "ks_p_value": 0.258051,
+      "distribution_shift_detected": false
+    },
+    "age": {
+      "feature_type": "categorical",
+      "psi": 0.0024,
+      "status": "stable",
+      "category_count": 10
+    },
+    "gender": {
+      "feature_type": "categorical",
+      "psi": 0.0001,
+      "status": "stable",
+      "category_count": 2
+    },
+    "race": {
+      "feature_type": "categorical",
+      "psi": 0.0007,
+      "status": "stable",
+      "category_count": 5
+    },
+    "diag_1_category": {
+      "feature_type": "categorical",
+      "psi": 0.0013,
+      "status": "stable",
+      "category_count": 10
+    }
+  }
+}

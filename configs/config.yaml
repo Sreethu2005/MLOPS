@@ -1,0 +1,143 @@
+# Configuration for Hospital Readmission MLOps Pipeline (Part 2)
+# Academic Decision-Support Prototype Only - Not for Clinical Diagnosis
+
+project:
+  name: "hospital_readmission_mlops"
+  version: "1.0.0"
+  random_seed: 42
+  disclaimer: "ACADEMIC DECISION-SUPPORT PROTOTYPE ONLY: This model is developed for research and educational purposes. It is not validated for clinical diagnosis, triage, or direct patient care."
+
+data:
+  raw_path: "data/raw/input/diabetic_data.csv"
+  mapping_path: "data/raw/input/dataset_diabetes/IDs_mapping.csv"
+  processed_dir: "data/processed"
+  train_data_path: "data/processed/train.parquet"
+  val_data_path: "data/processed/val.parquet"
+  test_data_path: "data/processed/test.parquet"
+  
+  # Target definition: CMS HRRP Standard (unplanned readmission within 30 days)
+  raw_target_col: "readmitted"
+  positive_label: "<30"
+  target_col: "readmitted_30d"
+
+  # Anti-leakage exclusions
+  patient_id_col: "patient_nbr"
+  encounter_id_col: "encounter_id"
+  # Expired or hospice discharge disposition IDs (cannot be readmitted)
+  leakage_discharge_disposition_ids: [11, 13, 14, 19, 20, 21]
+
+  # Train / Validation / Test Grouped split
+  split:
+    train_ratio: 0.70
+    val_ratio: 0.15
+    test_ratio: 0.15
+    strategy: "group_by_patient" # Prevents patient data leakage across splits
+
+features:
+  # Features with excessive missing rates (>40%) to drop
+  drop_cols:
+    - "weight"             # >96% missing
+    - "payer_code"          # >40% missing
+    - "medical_specialty"   # >48% missing
+    - "encounter_id"
+    - "patient_nbr"
+    - "discharge_disposition_id" # Dropped after filtering to prevent leakage proxy
+
+  numerical_cols:
+    - "time_in_hospital"
+    - "num_lab_procedures"
+    - "num_procedures"
+    - "num_medications"
+    - "number_outpatient"
+    - "number_emergency"
+    - "number_inpatient"
+    - "number_diagnoses"
+
+  categorical_cols:
+    - "race"
+    - "gender"
+    - "age"
+    - "admission_type_id"
+    - "admission_source_id"
+    - "max_glu_serum"
+    - "A1Cresult"
+    - "metformin"
+    - "repaglinide"
+    - "glimepiride"
+    - "glipizide"
+    - "glyburide"
+    - "pioglitazone"
+    - "rosiglitazone"
+    - "insulin"
+    - "change"
+    - "diabetesMed"
+    - "diag_1_category"
+    - "diag_2_category"
+    - "diag_3_category"
+
+mlflow:
+  tracking_uri: "sqlite:///mlruns.db"
+  experiment_name: "hospital_readmission_prediction"
+  artifact_location: "./mlruns"
+  registered_model_name: "HospitalReadmissionClassifier"
+
+training:
+  models:
+    logistic_regression:
+      solver: "lbfgs"
+      C: 0.1
+      max_iter: 1000
+      class_weight: "balanced"
+    random_forest:
+      n_estimators: 120
+      max_depth: 8
+      min_samples_split: 10
+      class_weight: "balanced"
+      n_jobs: -1
+    xgboost:
+      n_estimators: 150
+      max_depth: 4
+      learning_rate: 0.05
+      subsample: 0.8
+      colsample_bytree: 0.8
+      scale_pos_weight: 7.9  # Imbalance ratio: ~88% neg / 11.2% pos
+      eval_metric: "logloss"
+      random_state: 42
+
+calibration:
+  method: "sigmoid"
+  cv: 3
+
+decision_threshold:
+  # Screening use case prioritizes high sensitivity/recall to identify at-risk patients
+  primary_metric: "recall"
+  min_precision: 0.15
+  chosen_threshold: 0.35
+
+serving:
+  host: "0.0.0.0"
+  port: 8000
+  log_file: "logs/serving_requests.log"
+
+monitoring:
+  reference_data_path: "data/processed/train.parquet"
+  serving_log_path: "logs/serving_requests.log"
+  drift_thresholds:
+    psi_warning: 0.10
+    psi_critical: 0.25
+    ks_p_value_threshold: 0.05
+  demographic_features:
+    - "age"
+    - "gender"
+    - "race"
+  drift_tracked_features:
+    - "num_medications"
+    - "number_inpatient"
+    - "time_in_hospital"
+    - "num_lab_procedures"
+    - "number_diagnoses"
+    - "age"
+    - "gender"
+    - "race"
+    - "diag_1_category"
+

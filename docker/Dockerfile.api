@@ -1,0 +1,43 @@
+# Production Dockerfile for Hospital Readmission Inference Service
+# Academic Decision-Support Prototype Only — Not for Clinical Diagnostic Use
+
+FROM python:3.11-slim
+
+# Prevent Python from writing .pyc files and enable unbuffered logging
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    PYTHONPATH=/app
+
+WORKDIR /app
+
+# Install security updates and curl for container healthcheck
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+# Create dedicated non-root user and group
+RUN groupadd -r appuser && useradd -r -g appuser -d /app -s /sbin/nologin -c "Inference Service User" appuser
+
+# Install pinned dependencies
+COPY docker/requirements-api.txt /app/requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy application code, configs, models, and schema definitions
+COPY configs/ /app/configs/
+COPY src/ /app/src/
+COPY models/ /app/models/
+COPY mlruns.db /app/mlruns.db
+
+# Create logs directory and ensure appropriate permissions
+RUN mkdir -p /app/logs && chown -R appuser:appuser /app
+
+# Switch to non-root user for security best practice
+USER appuser
+
+EXPOSE 8000
+
+# Container healthcheck querying /health endpoint
+HEALTHCHECK --interval=20s --timeout=5s --start-period=5s --retries=3 \
+    CMD curl -f http://localhost:8000/health || exit 1
+
+CMD ["uvicorn", "src.serving.app:app", "--host", "0.0.0.0", "--port", "8000"]

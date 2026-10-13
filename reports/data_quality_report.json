@@ -1,0 +1,65 @@
+{
+  "overall_status": "PASSED",
+  "checks": [
+    {
+      "check_id": "DQ01_ROW_COUNTS",
+      "description": "Verify all splits have sufficient observations",
+      "status": "PASSED",
+      "details": {
+        "train_rows": 69665,
+        "val_rows": 14686,
+        "test_rows": 14992
+      }
+    },
+    {
+      "check_id": "DQ02_SCHEMA_COMPLETENESS",
+      "description": "Verify all feature and target columns exist in dataset",
+      "status": "PASSED",
+      "details": {
+        "missing_columns": []
+      }
+    },
+    {
+      "check_id": "DQ03_PATIENT_LEAKAGE_CHECK",
+      "description": "Verify ZERO patient overlap between train, validation, and test splits",
+      "status": "PASSED",
+      "details": {
+        "train_val_overlap": 0,
+        "train_test_overlap": 0,
+        "val_test_overlap": 0
+      }
+    },
+    {
+      "check_id": "DQ04_TARGET_DISTRIBUTION",
+      "description": "Verify binary 30-day readmission target and expected positive rate",
+      "status": "PASSED",
+      "details": {
+        "train_positive_rate": 0.1152,
+        "val_positive_rate": 0.1088,
+        "test_positive_rate": 0.1128
+      }
+    },
+    {
+      "check_id": "DQ05_VALUE_RANGES",
+      "description": "Verify numerical features conform to clinical boundary ranges",
+      "status": "PASSED",
+      "details": {
+        "range_failures": []
+      }
+    },
+    {
+      "check_id": "DQ06_ANTI_LEAKAGE_EXPIRED_CHECK",
+      "description": "Verify zero expired or hospice encounters present in training data",
+      "status": "PASSED",
+      "details": {
+        "expired_encounter_count": 0
+      }
+    }
+  ],
+  "summary": {
+    "total_checks": 6,
+    "passed_checks": 6,
+    "failed_checks": 0,
+    "overall_status": "PASSED"
+  }
+}

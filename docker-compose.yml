@@ -1,0 +1,128 @@
+
+x-airflow-common:
+  &airflow-common
+  image: apache/airflow:2.9.0-python3.10
+  environment:
+    &airflow-common-env
+    AIRFLOW__CORE__EXECUTOR: LocalExecutor
+    AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres/hospital_db
+    AIRFLOW__CORE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres/hospital_db
+    AIRFLOW__CORE__LOAD_EXAMPLES: 'false'
+    AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: 'true'
+    _AIRFLOW_DB_UPGRADE: 'true'
+    _AIRFLOW_WWW_USER_CREATE: 'true'
+    _AIRFLOW_WWW_USER_USERNAME: admin
+    _AIRFLOW_WWW_USER_PASSWORD: admin
+    PYTHONPATH: /opt/airflow
+    # Project specific env vars
+    POSTGRES_HOST: postgres
+    POSTGRES_PORT: 5432
+    POSTGRES_DB: hospital_db
+    POSTGRES_USER: airflow
+    POSTGRES_PASSWORD: airflow
+  volumes:
+    - ./dags:/opt/airflow/dags
+    - ./logs:/opt/airflow/logs
+    - ./plugins:/opt/airflow/plugins
+    - ./data:/opt/airflow/data
+    - ./src:/opt/airflow/src
+    - ./sql:/opt/airflow/sql
+    - ./config:/opt/airflow/config
+  user: "${AIRFLOW_UID:-50000}:0"
+
+services:
+  postgres:
+    image: postgres:13
+    environment:
+      POSTGRES_USER: airflow
+      POSTGRES_PASSWORD: airflow
+      POSTGRES_DB: hospital_db
+    volumes:
+      - postgres-db-volume:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "airflow"]
+      interval: 5s
+      retries: 5
+    restart: always
+    ports:
+      - "5433:5432"
+
+  airflow-init:
+    <<: *airflow-common
+    command: version
+    environment:
+      <<: *airflow-common-env
+      _AIRFLOW_DB_UPGRADE: 'true'
+      _AIRFLOW_WWW_USER_CREATE: 'true'
+      _AIRFLOW_WWW_USER_USERNAME: admin
+      _AIRFLOW_WWW_USER_PASSWORD: admin
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  airflow-webserver:
+    <<: *airflow-common
+    command: webserver
+    ports:
+      - 8080:8080
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "http://localhost:8080/health"]
+      interval: 10s
+      timeout: 10s
+      retries: 5
+    restart: always
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  airflow-scheduler:
+    <<: *airflow-common
+    command: scheduler
+    healthcheck:
+      test: ["CMD-SHELL", 'airflow jobs check --job-type SchedulerJob --hostname "$${HOSTNAME}"']
+      interval: 10s
+      timeout: 10s
+      retries: 5
+    restart: always
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  # ==========================================
+  # Part 2: MLOps Inference & Tracking Layer
+  # ==========================================
+  api:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.api
+    ports:
+      - "8000:8000"
+    environment:
+      - MLFLOW_TRACKING_URI=sqlite:////app/mlruns.db
+    volumes:
+      - ./models:/app/models:ro
+      - ./configs:/app/configs:ro
+      - ./logs:/app/logs
+      - ./mlruns.db:/app/mlruns.db:ro
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+    restart: always
+
+  mlflow:
+    image: python:3.11-slim
+    command: >
+      sh -c "pip install --no-cache-dir mlflow==3.17.0 &&
+             mlflow server --backend-store-uri sqlite:////mlruns.db --default-artifact-root /mlflow/artifacts --host 0.0.0.0 --port 5000"
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./mlruns.db:/mlruns.db
+      - ./mlruns:/mlflow/artifacts
+    restart: always
+
+volumes:
+  postgres-db-volume:
+

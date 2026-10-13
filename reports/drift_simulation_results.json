@@ -1,0 +1,23 @@
+{
+  "scenario_normal": {
+    "sample_size": 500,
+    "status": "STABLE",
+    "features_critical": 0,
+    "features_warning": 0,
+    "action": "Distributions are statistically stable within calibrated thresholds."
+  },
+  "scenario_drifted": {
+    "sample_size": 500,
+    "status": "CRITICAL_DRIFT",
+    "features_critical": 5,
+    "features_warning": 0,
+    "action": "CRITICAL DATA DRIFT DETECTED. Immediate feature investigation and pipeline retraining required.",
+    "drifted_feature_psi": {
+      "num_medications": 2.9853,
+      "number_inpatient": 8.9546,
+      "time_in_hospital": 4.2672,
+      "number_diagnoses": 0.8466,
+      "age": 4.4705
+    }
+  }
+}

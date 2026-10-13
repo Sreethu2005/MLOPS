@@ -1,0 +1,41 @@
+[
+  {
+    "Model":"LogisticRegression",
+    "Recall (Test)":0.5979,
+    "Precision (Test)":0.1478,
+    "F1 Score (Test)":0.237,
+    "ROC-AUC (Test)":0.6201,
+    "PR-AUC (Test)":0.1896,
+    "Brier Score (Test)":0.0975,
+    "ECE (Test)":0.005,
+    "Decision Threshold":0.1,
+    "Calibrated Applied":true,
+    "MLflow Run ID":"c42623eaea1a40bab62bbc320586f44a"
+  },
+  {
+    "Model":"RandomForest",
+    "Recall (Test)":0.6127,
+    "Precision (Test)":0.1487,
+    "F1 Score (Test)":0.2393,
+    "ROC-AUC (Test)":0.6176,
+    "PR-AUC (Test)":0.1886,
+    "Brier Score (Test)":0.0977,
+    "ECE (Test)":0.0067,
+    "Decision Threshold":0.1,
+    "Calibrated Applied":true,
+    "MLflow Run ID":"5f4921c7f0724ee5a574fde5a3af38e2"
+  },
+  {
+    "Model":"XGBoost",
+    "Recall (Test)":0.615,
+    "Precision (Test)":0.1497,
+    "F1 Score (Test)":0.2408,
+    "ROC-AUC (Test)":0.6273,
+    "PR-AUC (Test)":0.1919,
+    "Brier Score (Test)":0.0973,
+    "ECE (Test)":0.006,
+    "Decision Threshold":0.1,
+    "Calibrated Applied":true,
+    "MLflow Run ID":"7dfffaef14e04a038a77b5d637b1bee0"
+  }
+]

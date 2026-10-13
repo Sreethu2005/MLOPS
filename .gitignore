@@ -1,0 +1,34 @@
+.env
+# Logs
+logs/
+airflow/logs/
+*.log
+
+# Dependencies & Environments
+node_modules/
+.venv/
+venv/
+__pycache__/
+*.pyc
+
+# MLflow
+mlruns/
+mlruns.db
+
+# Testing & caches
+.pytest_cache/
+.DS_Store
+Thumbs.db
+
+# Data directories (keep gitkeep files)
+data/raw/*
+!data/raw/input/.gitkeep
+!data/raw/archive/.gitkeep
+data/staging/*
+!data/staging/.gitkeep
+data/cleaned/*
+!data/cleaned/.gitkeep
+data/processed/*
+!data/processed/.gitkeep
+data/rejected/*
+!data/rejected/.gitkeep

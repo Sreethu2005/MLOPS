@@ -1,0 +1,35 @@
+{
+  "base_value": 0.0367,
+  "top_features": [
+    {
+      "feature": "number_inpatient",
+      "shap_value": -0.2838,
+      "direction": "decreases_risk",
+      "feature_value_scaled": -0.5039
+    },
+    {
+      "feature": "number_diagnoses",
+      "shap_value": 0.1132,
+      "direction": "increases_risk",
+      "feature_value_scaled": 0.818
+    },
+    {
+      "feature": "age_[50-60)",
+      "shap_value": -0.091,
+      "direction": "decreases_risk",
+      "feature_value_scaled": 1.0
+    },
+    {
+      "feature": "num_procedures",
+      "shap_value": -0.0891,
+      "direction": "decreases_risk",
+      "feature_value_scaled": 2.7384
+    },
+    {
+      "feature": "diag_1_category_Circulatory",
+      "shap_value": 0.0558,
+      "direction": "increases_risk",
+      "feature_value_scaled": 1.0
+    }
+  ]
+}
